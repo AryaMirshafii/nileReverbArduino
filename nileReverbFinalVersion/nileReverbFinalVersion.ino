@@ -1,6 +1,6 @@
 #include <LiquidCrystal.h>
 #include "SoftwareSerial.h"
-#include "Timer.h"
+
 
 
 //Initialize a software serial
@@ -116,7 +116,6 @@ void loop() {
 
 
 // A function that checks for questions from the bluetooth serial.
-Timer t;
 void checkInputBTData() {
 
   if (mySerial.available()) {
@@ -161,11 +160,12 @@ void execute(String theCommand) {
 
 
   Serial.println("The command is " + theCommand);
-  if (theCommand.indexOf("go Next") > 0 || theCommand.indexOf("go Forward") > 0) {
+  if (theCommand.indexOf("go Next") > 0 || theCommand.indexOf("go Forward") > 0 || theCommand.indexOf("play Next") > 0) {
     mySerial.println(theCommand);
+    
     Serial.println("Skipping forward");
 
-  } else if (theCommand.indexOf("go Previous") > 0 || theCommand.indexOf("go Back") > 0) {
+  } else if (theCommand.indexOf("go Previous") > 0 || theCommand.indexOf("go Back") > 0 || theCommand.indexOf("play Previous") > 0) {
     mySerial.println(theCommand);
     Serial.println("Skipping back");
 
@@ -184,6 +184,14 @@ void execute(String theCommand) {
 
     Serial.println("Getting weather");
     mySerial.println(theCommand);
+  } else if(theCommand.indexOf("pause") > 0){
+    mySerial.println(theCommand);
+    
+    Serial.println("Pausing Player");
+  }else if(theCommand.indexOf("start") > 0){
+    mySerial.println(theCommand);
+    
+    Serial.println("Starting Player");
   }
 
   //If the command still hasnt been executed at this point then it is probably invalid
@@ -336,7 +344,7 @@ void readButtons() {
 void screen() {
 
   lcd.setCursor(0, 1); // set the cursor to column 0, line 2
-  delay(700);//delay of 0.3sec
+  delay(200);//delay of 0.3sec
 
   lcd.scrollDisplayRight();//shifting data on LCD
 
