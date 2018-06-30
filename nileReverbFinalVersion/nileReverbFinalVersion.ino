@@ -1,4 +1,4 @@
-#include <LiquidCrystal.h>
+ #include <LiquidCrystal.h>
 #include "SoftwareSerial.h"
 
 
@@ -36,6 +36,7 @@ String bluetoothInput = "";
 // Booleans
 boolean isPlayingMusic = false;
 boolean isAsking = false;
+boolean isTexting = false;
 
 
 
@@ -70,11 +71,13 @@ void setup() {
 // The main loop function
 void loop() {
 
-  //mySerial.println("");
+  //mySerial.println("Arya");
+  
   if (Serial.available() && !isReading) {
-
+    //Serial.println("Stage 1");
     //This section of code capitalizes the letters after a space in a command
     if (command[command.length() - 1] == ' ') {
+     // Serial.println("Stage 2");
       char ardunioData = char(Serial.read());
 
       Serial.println(command);
@@ -87,15 +90,27 @@ void loop() {
 
       command += ardunioData;
     } else {
+      //Serial.println("Stage 3");
       command += char(Serial.read());
     }
 
 
+  } else {
+    //Serial.println("isreading is " + String(isReading));
   }
 
 
   if (command != "" && command[command.length() - 1] == '\n') {
-    execute(command);
+    //Serial.println("Is texting is " + String(isTexting));
+    if(!isTexting){
+      Serial.println("Right here");
+      execute(command);
+    } else {
+       command = "text message " + command;
+       execute(command);
+       isTexting = false;
+    }
+    
   }
 
 
@@ -175,7 +190,8 @@ void execute(String theCommand) {
   } else if (theCommand.indexOf("play") > 0) {
     mySerial.println(theCommand);
     Serial.println("playing some music");
-  } else if (theCommand.indexOf("Ask") > 0 ) {
+  } else if (theCommand.indexOf("Ask ") > 0 ) {
+    Serial.println("Asking a question");
     askQuestion(theCommand);
 
   } else if (theCommand.indexOf("UpdateW") > 0 ) {
@@ -192,7 +208,15 @@ void execute(String theCommand) {
     mySerial.println(theCommand);
     
     Serial.println("Starting Player");
+  }else if (theCommand.indexOf("text") > 0 ) {
+    mySerial.println(theCommand);
+    isTexting = true;
+    Serial.println("Texting" + theCommand);
+  }else if(theCommand.indexOf("text message") > 0){
+    mySerial.println(theCommand);
+    isTexting = false;
   }
+  
 
   //If the command still hasnt been executed at this point then it is probably invalid
   command = "";
@@ -249,14 +273,20 @@ void updateWeather(String weatherString) {
 
 // Function that asks a question and prints it to the screen
 void askQuestion(String question) {
+  if(question.indexOf("what would you like to text") > 0){
+    isTexting = true;
+  }
+  
+  question.replace("Ask ", "");
   question.replace("_", "");
-  Serial.println("The improved Question is" + question);
+  Serial.println(question);
   writeToScreen(question, "");
 
 
   // Split string into choices using strtok
 
   isAsking = true;
+  isReading = false;
 
 }
 
@@ -326,6 +356,7 @@ void readButtons() {
     delay(500);
 
   }
+  
 
 
 
