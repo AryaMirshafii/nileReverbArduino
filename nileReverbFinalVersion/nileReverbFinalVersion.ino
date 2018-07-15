@@ -54,7 +54,7 @@ void setup() {
 
 
   lcd.begin(16, 2);
-  Serial.begin(57600); //Initialize normal serial
+  Serial.begin(9600); //Initialize normal serial
   mySerial.begin(9600); //Can be changed on AT command mode
 
 
@@ -74,24 +74,41 @@ void loop() {
   //mySerial.println("Arya");
   
   if (Serial.available() && !isReading) {
+    char ardunioData = char(Serial.read());
     //Serial.println("Stage 1");
     //This section of code capitalizes the letters after a space in a command
     if (command[command.length() - 1] == ' ') {
      // Serial.println("Stage 2");
-      char ardunioData = char(Serial.read());
+      //char ardunioData = char(Serial.read());
 
-      Serial.println(command);
+      //Serial.println(command);
       
       //this part ensures that the character being capitalized is an actual character
       int charAsInt = int(ardunioData);
-      if ((charAsInt > 64 & charAsInt < 91) || (charAsInt > 96 & charAsInt < 123)) {
+      if ((charAsInt > 96 & charAsInt < 123)) {
         ardunioData = int(ardunioData) - 32;
+      }
+      if(charAsInt == 32){
+      
+        ardunioData = '*';
+        
       }
 
       command += ardunioData;
+      Serial.println(command);
+      Serial.println("String length is: " + String(command.length()));
+      
     } else {
+      //char ardunioData = char(Serial.read());
       //Serial.println("Stage 3");
-      command += char(Serial.read());
+      if(int(ardunioData) == 32){
+        //Serial.println("Space detected");
+        ardunioData = '*';
+      }
+      //command += char(Serial.read());
+      command += ardunioData;
+      Serial.println(command);
+      Serial.println("String length is: " + String(command.length()));
     }
 
 
@@ -101,7 +118,7 @@ void loop() {
 
 
   if (command != "" && command[command.length() - 1] == '\n') {
-    //Serial.println("Is texting is " + String(isTexting));
+    Serial.println("Is texting is " + String(isTexting));
     if(!isTexting){
       Serial.println("Right here");
       execute(command);
@@ -111,7 +128,7 @@ void loop() {
        isTexting = false;
     }
     
-  }
+  } 
 
 
 
@@ -213,16 +230,27 @@ void execute(String theCommand) {
     isTexting = true;
     Serial.println("Texting" + theCommand);
   }else if(theCommand.indexOf("text message") > 0){
-    mySerial.println(theCommand);
+    text(theCommand);
+    isTexting = false;
+  }else if(theCommand.indexOf("contact does not exist") > 0){
+    writeToScreen(theCommand, "");
     isTexting = false;
   }
-  
 
   //If the command still hasnt been executed at this point then it is probably invalid
   command = "";
   isReading = false;
 
 }
+void text(String message){
+  if(message.length() > 20){
+      Serial.println("The length exceeds 20");
+  }
+  mySerial.println(message);
+  //isTexting = false;
+}
+
+
 
 
 
