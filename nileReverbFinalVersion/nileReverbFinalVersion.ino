@@ -1,5 +1,9 @@
- #include <LiquidCrystal.h>
+
+#include <LiquidCrystal.h>
 #include "SoftwareSerial.h"
+
+
+
 
 
 
@@ -70,46 +74,15 @@ void setup() {
 
 // The main loop function
 void loop() {
-
+  
   //mySerial.println("Arya");
   
   if (Serial.available() && !isReading) {
-    char ardunioData = char(Serial.read());
-    //Serial.println("Stage 1");
-    //This section of code capitalizes the letters after a space in a command
-    if (command[command.length() - 1] == ' ') {
-     // Serial.println("Stage 2");
-      //char ardunioData = char(Serial.read());
-
-      //Serial.println(command);
-      
-      //this part ensures that the character being capitalized is an actual character
-      int charAsInt = int(ardunioData);
-      if ((charAsInt > 96 & charAsInt < 123)) {
-        ardunioData = int(ardunioData) - 32;
-      }
-      if(charAsInt == 32){
-      
-        ardunioData = '*';
-        
-      }
-
-      command += ardunioData;
+    command = Serial.readString();
+      command.toLowerCase();
       Serial.println(command);
       Serial.println("String length is: " + String(command.length()));
       
-    } else {
-      //char ardunioData = char(Serial.read());
-      //Serial.println("Stage 3");
-      if(int(ardunioData) == 32){
-        //Serial.println("Space detected");
-        ardunioData = '*';
-      }
-      //command += char(Serial.read());
-      command += ardunioData;
-      Serial.println(command);
-      Serial.println("String length is: " + String(command.length()));
-    }
 
 
   } else {
@@ -147,12 +120,16 @@ void loop() {
 
 
 
+
+
+
 // A function that checks for questions from the bluetooth serial.
 void checkInputBTData() {
 
   if (mySerial.available()) {
     isReading = true;
-    bluetoothInput +=  char(mySerial.read());
+    bluetoothInput = mySerial.readString();
+    //bluetoothInput +=  char(mySerial.read());
     Serial.println(bluetoothInput);
   }else {
     isReading = false;
@@ -247,7 +224,7 @@ void text(String message){
       Serial.println("The length exceeds 20");
   }
   mySerial.println(message);
-  //isTexting = false;
+  isTexting = false;
 }
 
 
