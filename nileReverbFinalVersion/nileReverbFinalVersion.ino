@@ -224,7 +224,7 @@ void text(String message){
       Serial.println("The length exceeds 20");
   }
   mySerial.println(message);
-  isTexting = false;
+  //isTexting = false;
 }
 
 
