@@ -54,6 +54,9 @@ String choices[3];
 
 boolean isReading = false;
 // The main setup function
+
+
+int nextPreviousCount = 0;
 void setup() {
 
 
@@ -79,7 +82,9 @@ void loop() {
   
   if (Serial.available() && !isReading) {
     command = Serial.readString();
+    
       command.toLowerCase();
+      
       Serial.println(command);
       Serial.println("String length is: " + String(command.length()));
       
@@ -168,8 +173,26 @@ void execute(String theCommand) {
 
 
 
+/**
+  //This is where the unusual characters are filtered from the command
+  char chArray[theCommand.length()];
+  theCommand.toCharArray(chArray, theCommand.length());
+  for(int i = 0 ; i < theCommand.length();  i++){
+    if(chArray[i] == '$' || chArray[i] == '@' || chArray[i] == '~' || chArray[i] == '|' || chArray[i] == '%' || chArray[i] == '^'){
+      
+      chArray[i]  = (char) 0;
+    }
+  }
+
+  theCommand = (char*)chArray;
+  */
+
+
   Serial.println("The command is " + theCommand);
-  if (theCommand.indexOf("go Next") > 0 || theCommand.indexOf("go Forward") > 0 || theCommand.indexOf("play Next") > 0) {
+  if (theCommand.indexOf("go next") > 0 || theCommand.indexOf("go forward") > 0) {
+    theCommand[theCommand.length() - 1] =  ' ';
+      theCommand += String(nextPreviousCount) + "_";
+      nextPreviousCount++;
     mySerial.println(theCommand);
     
     Serial.println("Skipping forward");
@@ -182,6 +205,11 @@ void execute(String theCommand) {
     Serial.println("Song playing has been started");
     writeToScreen(theCommand, "");
   } else if (theCommand.indexOf("play") > 0) {
+    if(theCommand.indexOf("next_") > 0 || theCommand.indexOf("previous_") > 0){
+      theCommand[theCommand.length() - 1] =  ' ';
+      theCommand += String(nextPreviousCount) + "_";
+      nextPreviousCount++;
+    }
     mySerial.println(theCommand);
     Serial.println("playing some music");
   } else if (theCommand.indexOf("Ask ") > 0 ) {
@@ -206,23 +234,35 @@ void execute(String theCommand) {
     mySerial.println(theCommand);
     isTexting = true;
     Serial.println("Texting" + theCommand);
+    writeToScreen("","");
   }else if(theCommand.indexOf("text message") > 0){
     text(theCommand);
     isTexting = false;
+    writeToScreen("","");
   }else if(theCommand.indexOf("contact does not exist") > 0){
     writeToScreen(theCommand, "");
     isTexting = false;
+  } else if(theCommand.indexOf("Texted") > 0){
+    theCommand.replace("_Invalid request_","");
+    //Eventually add strtok here to split the command string
+    theCommand.replace("_","");
+    writeToScreen(theCommand, "");
+    
+    
   }
 
   //If the command still hasnt been executed at this point then it is probably invalid
   command = "";
   isReading = false;
-
+  
 }
+
+
 void text(String message){
   if(message.length() > 20){
       Serial.println("The length exceeds 20");
   }
+  //message.replace(" ", "*");
   mySerial.println(message);
   //isTexting = false;
 }
@@ -306,13 +346,13 @@ void readButtons() {
 
 
   if (button1HighLow == HIGH) {
-    command = "_play wonderwall_";
+    command = "_play you make my dreams come true_";
     Serial.println(sizeof(command));
     mySerial.println(command);
-    writeToScreen("Playing Hotel California By: The Eagles", "");
-    Serial.println(sizeof("Playing Hotel California By: The Eagles"));
+    //writeToScreen("Playing Hotel California By: The Eagles", "");
+    //Serial.println(sizeof("Playing Hotel California By: The Eagles"));
     command = "";
-    delay(500);
+    //delay(500);
   } else {
 
   }
@@ -379,7 +419,7 @@ void readButtons() {
 //A function that is called in the main loop and is the code that makes the screen continue running
 void screen() {
 
-  lcd.setCursor(0, 1); // set the cursor to column 0, line 2
+  lcd.setCursor(0, 0); // set the cursor to column 0, line 2
   delay(200);//delay of 0.3sec
 
   lcd.scrollDisplayRight();//shifting data on LCD
